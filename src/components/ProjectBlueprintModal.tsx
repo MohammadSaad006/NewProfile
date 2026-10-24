@@ -27,7 +27,7 @@ export const ProjectBlueprintModal: React.FC<ProjectBlueprintModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl max-h-[88vh] overflow-y-auto bg-[#0A0A10] border border-[#D4AF37]/40 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6"
+        className="relative w-full max-w-2xl max-h-[88vh] overflow-y-auto no-scrollbar bg-[#070814] border border-sky-400/40 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Close Action */}

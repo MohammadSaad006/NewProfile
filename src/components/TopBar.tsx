@@ -15,7 +15,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   return (
     <header
       role="banner"
-      className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between gap-8 px-6 py-3.5 bg-[#07070B]/95 border-b border-[#D4AF37]/20"
+      className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between gap-8 px-6 py-3.5 bg-[#040610]/92 border-b border-sky-400/20"
     >
       {/* Zone 1: Single text element wordmark */}
       <a
@@ -24,7 +24,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           e.preventDefault();
           onSelectChapter('origin');
         }}
-        className="font-display text-xl font-semibold tracking-tight text-[#F4F1EA] hover:text-[#D4AF37] transition-colors whitespace-nowrap shrink-0"
+        className="font-display text-xl font-semibold tracking-tight text-white hover:text-sky-400 transition-colors whitespace-nowrap shrink-0"
       >
         Mohammad Saad
       </a>
@@ -38,17 +38,17 @@ export const TopBar: React.FC<TopBarProps> = ({
               key={chapter.id}
               type="button"
               onClick={() => onSelectChapter(chapter.id)}
-              className={`relative py-1 transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] rounded-sm ${
+              className={`relative py-1 transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 rounded-sm ${
                 isActive
-                  ? 'text-[#D4AF37] font-semibold'
-                  : 'text-[#A1A1AA] hover:text-[#F4F1EA]'
+                  ? 'text-sky-400 font-semibold'
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
               {chapter.navLabel}
               {isActive && (
                 <span
                   aria-hidden="true"
-                  className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[#D4AF37]"
+                  className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-sky-400 via-purple-400 to-amber-400"
                 />
               )}
             </button>
@@ -61,7 +61,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         <button
           type="button"
           onClick={onOpenCommission}
-          className="px-4 py-2 text-xs font-semibold text-[#060609] bg-[#D4AF37] hover:bg-[#E5C358] transition-colors rounded-md whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F4F1EA]"
+          className="px-4 py-2 text-xs font-semibold text-[#030308] bg-gradient-to-r from-amber-400 via-amber-300 to-sky-300 hover:brightness-110 transition-all rounded-lg whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white shadow-md"
         >
           Commission Inquiry
         </button>

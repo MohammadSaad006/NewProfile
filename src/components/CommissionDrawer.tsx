@@ -68,7 +68,7 @@ export const CommissionDrawer: React.FC<CommissionDrawerProps> = ({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-lg h-full overflow-y-auto bg-[#09090F] border-l border-[#D4AF37]/35 p-6 sm:p-8 shadow-2xl flex flex-col justify-between space-y-6"
+        className="relative w-full max-w-lg h-full overflow-y-auto no-scrollbar bg-[#070814] border-l border-sky-400/35 p-6 sm:p-8 shadow-2xl flex flex-col justify-between space-y-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="space-y-6">

@@ -9,8 +9,8 @@
 
   body {
     font-family: var(--font-sans);
-    background-color: #060609;
-    color: #F4F1EA;
+    background-color: #030308;
+    color: #F8FAFC;
     overflow: hidden;
     user-select: none;
   }
@@ -26,21 +26,12 @@
   }
 }
 
-/* Custom subtle scrollbars for modal & inspection drawers */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+/* Hide ugly native scrollbars while preserving smooth scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
-::-webkit-scrollbar-track {
-  background: #09090E;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #272732;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #D4AF37;
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

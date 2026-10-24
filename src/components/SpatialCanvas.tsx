@@ -28,7 +28,7 @@ interface SpatialCanvasProps {
 // Pre-allocated math helpers at module scope (Zero GC inside render loop)
 const _desiredCamPos = new THREE.Vector3();
 const _desiredLookAt = new THREE.Vector3();
-const _currentLookAt = new THREE.Vector3(-1.1, 1.85, 0);
+const _currentLookAt = new THREE.Vector3(0, 1.85, 0);
 const _partTargetPos = new THREE.Vector3();
 const _pointerNdc = new THREE.Vector2();
 
@@ -44,7 +44,6 @@ export const SpatialCanvas: React.FC<SpatialCanvasProps> = ({
   const [webglFallback, setWebglFallback] = useState(false);
   const [hoveredChapter, setHoveredChapter] = useState<ChapterId | null>(null);
 
-  // Store latest props in refs so React HUD updates never tear down the WebGLRenderer
   const stateRef = useRef({
     activeChapter,
     finishPreset,
@@ -74,7 +73,7 @@ export const SpatialCanvas: React.FC<SpatialCanvasProps> = ({
     const mountEl = canvasMountRef.current;
     if (!mountEl) return;
 
-    // 1. Detect software WebGL (SwiftShader / llvmpipe / Basic Render) per threejs skill
+    // 1. Detect software WebGL (SwiftShader / llvmpipe / Basic Render)
     const isSoftwareGl = (() => {
       try {
         const probeCanvas = document.createElement('canvas');
@@ -103,7 +102,7 @@ export const SpatialCanvas: React.FC<SpatialCanvasProps> = ({
 
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.12;
+    renderer.toneMappingExposure = 1.18;
     renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = !isSoftwareGl;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -112,7 +111,6 @@ export const SpatialCanvas: React.FC<SpatialCanvasProps> = ({
     mountEl.innerHTML = '';
     mountEl.appendChild(renderer.domElement);
 
-    // WebGL Context Loss safety handlers
     const handleContextLost = (e: Event) => {
       e.preventDefault();
       setWebglFallback(true);
@@ -123,12 +121,12 @@ export const SpatialCanvas: React.FC<SpatialCanvasProps> = ({
     renderer.domElement.addEventListener('webglcontextlost', handleContextLost);
     renderer.domElement.addEventListener('webglcontextrestored', handleContextRestored);
 
-    // 2. Scene, Fog & Camera Setup
+    // 2. Deep-Space Galaxy Scene & Camera Setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x060609);
-    scene.fog = new THREE.FogExp2(0x060609, 0.018);
+    scene.background = new THREE.Color(0x030308);
+    scene.fog = new THREE.FogExp2(0x030308, 0.011);
 
-    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 160);
+    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 200);
     const initialTransform = getChapterCameraTransform(
       stateRef.current.activeChapter,
       stateRef.current.cameraViewMode,
@@ -138,21 +136,20 @@ export const SpatialCanvas: React.FC<SpatialCanvasProps> = ({
     _currentLookAt.set(...initialTransform.lookAtTarget);
     camera.lookAt(_currentLookAt);
 
-    // 3. Studio Environment Map via RoomEnvironment + PMREMGenerator (on every device)
+    // 3. Studio Environment Map via RoomEnvironment + PMREMGenerator
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     const roomEnv = new RoomEnvironment();
     scene.environment = pmremGenerator.fromScene(roomEnv, 0.04).texture;
     roomEnv.dispose();
     pmremGenerator.dispose();
 
-    // 4. Balanced 3-Point Warm/Cool Studio Lighting Rig
-    // Cool sky / warm ground HemisphereLight fill
-    const hemiLight = new THREE.HemisphereLight(0x94a3b8, 0x1e1810, 0.65);
-    hemiLight.position.set(0, 25, 0);
+    // 4. Balanced 3-Point Cosmic Studio Lighting Rig
+    const hemiLight = new THREE.HemisphereLight(0x38bdf8, 0x1e1b4b, 0.75);
+    hemiLight.position.set(0, 30, 0);
     scene.add(hemiLight);
 
-    // Warm Golden Key Light (<= 1 shadow caster)
-    const keyLight = new THREE.DirectionalLight(0xfff1d6, 2.4);
+    // Warm Supernova Key Light
+    const keyLight = new THREE.DirectionalLight(0xfef08a, 2.5);
     keyLight.position.set(8, 14, 10);
     if (!isSoftwareGl) {
       keyLight.castShadow = true;
@@ -171,29 +168,29 @@ export const SpatialCanvas: React.FC<SpatialCanvasProps> = ({
     scene.add(keyLight);
     scene.add(keyLight.target);
 
-    // Cool Rim Backlight for silhouette separation
-    const rimLight = new THREE.DirectionalLight(0x60a5fa, 1.15);
+    // Nebula Violet Rim Backlight
+    const rimLight = new THREE.DirectionalLight(0xc084fc, 1.45);
     rimLight.position.set(-10, 8, -12);
     scene.add(rimLight);
     scene.add(rimLight.target);
 
-    // Studio Softboxes (RectAreaLight) when !isSoftwareGl
+    // Studio Softbox when !isSoftwareGl
     if (!isSoftwareGl) {
       RectAreaLightUniformsLib.init();
-      const softbox = new THREE.RectAreaLight(0xffeedd, 3.5, 6, 3);
+      const softbox = new THREE.RectAreaLight(0x38bdf8, 3.8, 6, 3);
       softbox.position.set(0, 6, 4);
       softbox.lookAt(0, 1.8, 0);
       scene.add(softbox);
     }
 
-    // 5. Procedural Textures, PBR Materials & 5 Monuments
+    // 5. Procedural Textures, PBR Materials, Spiral Galaxy & 5 Clean Monuments
     const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
     const textures = createProceduralTextureSet(maxAnisotropy);
     const materials = createAtelierMaterials(textures, isSoftwareGl);
     materials.updateFinishPreset(stateRef.current.finishPreset);
     materialsRef.current = materials;
 
-    const { monuments, constellationMesh, hitProxies } = buildAtelierWorld(
+    const { monuments, galaxyPoints, deepStarfield, hitProxies } = buildAtelierWorld(
       scene,
       materials,
       textures,
@@ -239,7 +236,6 @@ export const SpatialCanvas: React.FC<SpatialCanvasProps> = ({
         return;
       }
 
-      // Throttled hover raycast on Layer 1
       const now = performance.now();
       if (now - lastRaycastTime < 65) return;
       lastRaycastTime = now;
@@ -262,7 +258,6 @@ export const SpatialCanvas: React.FC<SpatialCanvasProps> = ({
       isDragging = false;
       const moveDist = Math.hypot(e.clientX - pointerDownX, e.clientY - pointerDownY);
       if (moveDist < 6) {
-        // Click raycast to select monument directly in 3D space
         const rect = renderer.domElement.getBoundingClientRect();
         _pointerNdc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
         _pointerNdc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
@@ -331,16 +326,13 @@ export const SpatialCanvas: React.FC<SpatialCanvasProps> = ({
     function updateSceneKinematics(dt: number, elapsed: number) {
       const { activeChapter: currChapter, cameraViewMode: currMode, explodeFactor: targetExplode } = stateRef.current;
 
-      // Smoothly damp explode factor & user orbit offsets
       currentExplode = THREE.MathUtils.damp(currentExplode, targetExplode, 6, dt);
       userYawOffset = THREE.MathUtils.damp(userYawOffset, targetYawOffset, 6, dt);
       userPitchOffset = THREE.MathUtils.damp(userPitchOffset, targetPitchOffset, 6, dt);
 
-      // Compute desired camera position & lookAt target
       const camSpec = getChapterCameraTransform(currChapter, currMode, currentExplode);
       _desiredLookAt.set(...camSpec.lookAtTarget);
 
-      // Apply user drag orbit around the monument target
       const baseDx = camSpec.cameraPosition[0] - camSpec.lookAtTarget[0];
       const baseDy = camSpec.cameraPosition[1] - camSpec.lookAtTarget[1];
       const baseDz = camSpec.cameraPosition[2] - camSpec.lookAtTarget[2];
@@ -362,24 +354,26 @@ export const SpatialCanvas: React.FC<SpatialCanvasProps> = ({
       _currentLookAt.z = THREE.MathUtils.damp(_currentLookAt.z, _desiredLookAt.z, 5.5, dt);
       camera.lookAt(_currentLookAt);
 
-      // Move keyLight with active monument so shadows stay crisp
       keyLight.position.set(_currentLookAt.x + 7, 13, _currentLookAt.z + 9);
       keyLight.target.position.copy(_currentLookAt);
 
-      // Subtle rotation of constellation shards
-      constellationMesh.rotation.y = elapsed * 0.015;
+      // Parallax-track and rotate the 5-arm spiral galaxy vortex and deep starfield behind the active monument
+      galaxyPoints.position.x = _currentLookAt.x;
+      galaxyPoints.position.z = _currentLookAt.z - 13.5;
+      galaxyPoints.rotation.y = elapsed * 0.055;
 
-      // Update each monument's kinetic core & exploded parts
+      deepStarfield.position.x = _currentLookAt.x;
+      deepStarfield.position.z = _currentLookAt.z;
+      deepStarfield.rotation.y = -elapsed * 0.012;
+
       for (let i = 0; i < monuments.length; i++) {
         const mon: MonumentInstance = monuments[i];
         const isCurrent = mon.chapterId === currChapter;
         const monExplode = isCurrent ? currentExplode : 0;
 
-        // Gentle levitation of the kinetic core
-        mon.kineticCore.position.y = 2.05 + Math.sin(elapsed * 1.4 + i) * 0.055;
-        mon.kineticCore.rotation.y = elapsed * 0.18;
+        mon.kineticCore.position.y = 2.0 + Math.sin(elapsed * 1.4 + i) * 0.06;
+        mon.kineticCore.rotation.y = elapsed * 0.22;
 
-        // Scale selection halo ring slightly when active
         const haloScale = isCurrent ? 1.06 : 0.92;
         mon.haloRing.scale.setScalar(THREE.MathUtils.damp(mon.haloRing.scale.x, haloScale, 6, dt));
 
@@ -412,9 +406,20 @@ export const SpatialCanvas: React.FC<SpatialCanvasProps> = ({
       }
     }
 
-    // Render initial frame immediately, then schedule loop
     updateSceneKinematics(0.016, 0);
     renderer.render(scene, camera);
+    renderer.domElement.dataset.ready = '1';
+
+    // Deterministic stepping hook for automated visual verification
+    const win = window as unknown as { __step?: (ms: number) => void };
+    win.__step = (ms: number) => {
+      const steps = Math.max(1, Math.round(ms / 16));
+      for (let s = 0; s < steps; s++) {
+        updateSceneKinematics(0.016, clock.getElapsedTime() + s * 0.016);
+      }
+      renderer.render(scene, camera);
+    };
+
     if (isSoftwareGl) {
       afterDraw(tick);
     } else {
@@ -423,6 +428,7 @@ export const SpatialCanvas: React.FC<SpatialCanvasProps> = ({
 
     return () => {
       isDisposed = true;
+      delete win.__step;
       cancelAnimationFrame(frameId);
       clearTimeout(frameId);
       domEl.removeEventListener('pointerdown', onPointerDown);
@@ -439,8 +445,7 @@ export const SpatialCanvas: React.FC<SpatialCanvasProps> = ({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-0 overflow-hidden bg-[#060609]">
-      {/* Dedicated empty ref container for Three.js WebGLRenderer */}
+    <div className="fixed inset-0 z-0 overflow-hidden bg-[#030308]">
       <div
         ref={canvasMountRef}
         data-testid="spatial-webgl-canvas"
@@ -449,16 +454,15 @@ export const SpatialCanvas: React.FC<SpatialCanvasProps> = ({
         className={`w-full h-full ${hoveredChapter ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}`}
       />
 
-      {/* Graceful Static Architectural Fallback if WebGL context is unavailable */}
       {webglFallback && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#060609] p-8 text-center">
-          <div className="max-w-md border border-[#D4AF37]/30 bg-[#0B0B10] p-8 rounded-xl">
-            <p className="font-mono-tabular text-xs text-[#D4AF37] mb-2">CAL. MS-01 · ARCHITECTURAL VIEWPORT</p>
-            <h2 className="font-display text-2xl font-semibold text-[#F4F1EA] mb-2">
-              Mohammad Saad Spatial Atelier
+        <div className="absolute inset-0 flex items-center justify-center bg-[#030308] p-8 text-center">
+          <div className="max-w-md border border-sky-400/30 bg-[#070914] p-8 rounded-xl">
+            <p className="font-mono-tabular text-xs text-sky-400 mb-2">SECTOR MS-01 · GALAXY OBSERVATORY</p>
+            <h2 className="font-display text-2xl font-semibold text-[#F8FAFC] mb-2">
+              Mohammad Saad Cosmic Observatory
             </h2>
-            <p className="text-sm text-[#A1A1AA]">
-              Interactive 3D WebGL viewports are paused on this graphics context. All portfolio chapters, engineering specifications, and live deployments remain accessible via the navigation controls.
+            <p className="text-sm text-[#94A3B8]">
+              Interactive 3D WebGL viewports are paused on this graphics context. All portfolio sectors, engineering specifications, and live deployments remain accessible via the navigation controls.
             </p>
           </div>
         </div>

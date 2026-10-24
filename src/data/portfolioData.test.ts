@@ -32,11 +32,11 @@ test('getChapterCameraTransform returns deterministic world coordinates and pull
   const assembled = getChapterCameraTransform('origin', 'gallery', 0);
   const exploded = getChapterCameraTransform('origin', 'gallery', 1);
 
-  assert.equal(assembled.cameraPosition[0], -2.8);
+  assert.equal(assembled.cameraPosition[0], 0);
   assert.equal(exploded.cameraPosition[2] > assembled.cameraPosition[2], true);
 
   const systemsMacro = getChapterCameraTransform('systems', 'macro', 0);
-  assert.equal(systemsMacro.cameraPosition[0], 13.4);
+  assert.equal(systemsMacro.cameraPosition[0], 16);
 });
 
 test('stepChapterIndex wraps around chapter bounds cleanly', () => {

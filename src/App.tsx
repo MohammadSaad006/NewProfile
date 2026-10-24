@@ -11,6 +11,7 @@ import {
   ChapterId,
   CommissionInquiry,
   FinishPresetId,
+  KineticWaveMode,
   ShowcaseWork,
   stepChapterIndex,
 } from './data/portfolioData';
@@ -26,6 +27,7 @@ export default function App() {
   const [activeChapter, setActiveChapter] = useState<ChapterId>('origin');
   const [finishPreset, setFinishPreset] = useState<FinishPresetId>('champagne-gold');
   const [cameraViewMode, setCameraViewMode] = useState<CameraViewMode>('gallery');
+  const [kineticWaveMode, setKineticWaveMode] = useState<KineticWaveMode>('harmonic');
   const [explodeFactor, setExplodeFactor] = useState<number>(0);
   const [isZenMode, setIsZenMode] = useState<boolean>(false);
 
@@ -49,7 +51,8 @@ export default function App() {
   useEffect(() => {
     document.body.setAttribute('data-active-chapter', activeChapter);
     document.body.setAttribute('data-zen-mode', String(isZenMode));
-  }, [activeChapter, isZenMode]);
+    document.body.setAttribute('data-kinetic-wave', kineticWaveMode);
+  }, [activeChapter, isZenMode, kineticWaveMode]);
 
   // Global keyboard shortcuts (1-5 chapters, Left/Right arrows, H for Cinema Mode, Escape for modals)
   useEffect(() => {
@@ -103,6 +106,7 @@ export default function App() {
         onSelectChapter={setActiveChapter}
         finishPreset={finishPreset}
         cameraViewMode={cameraViewMode}
+        kineticWaveMode={kineticWaveMode}
         explodeFactor={explodeFactor}
         onStepChapter={handleStepChapter}
       />
@@ -143,6 +147,8 @@ export default function App() {
         onChangeFinishPreset={setFinishPreset}
         cameraViewMode={cameraViewMode}
         onChangeCameraViewMode={setCameraViewMode}
+        kineticWaveMode={kineticWaveMode}
+        onChangeKineticWaveMode={setKineticWaveMode}
         isZenMode={isZenMode}
         onToggleZenMode={() => setIsZenMode((prev) => !prev)}
         onOpenVault={() => setIsVaultOpen(true)}
